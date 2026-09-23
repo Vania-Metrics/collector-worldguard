@@ -1,0 +1,11 @@
+# What the test server needs besides the core; read by the core's testkit (CollectorTestConfig).
+# The first jar of a list is the target plugin: its version is checked against compatibility.yml.
+# WorldEdit 7.4.3+ is compiled for Java 25; WorldGuard needs WorldEdit.
+collectors: [region]
+runtime: java25
+plugins:
+  bukkit:
+    - url: https://cdn.modrinth.com/data/DKY9btbd/versions/pI4UHLJL/worldguard-bukkit-7.0.17.jar
+      sha512: 5da539cf8618079f9e7f5a0ab578c62d31ebd88e35b39ca047a2f9115e397e0d4dd781a94ca373e93333fce3371f7eaf503cd0b6abb6363085e3f4968ea51e4b
+    - url: https://cdn.modrinth.com/data/1u6JkXh5/versions/F5ea2ov3/worldedit-bukkit-7.4.5.jar
+      sha512: a383492fac6bfb4d43a257dfa7b5fc076aae503a71151b463de4fe80e6f3d5fc11209eaf4097baa115f3febf0adc40ca0a1ecda227b8439b429d0a4ba3a63a4f
