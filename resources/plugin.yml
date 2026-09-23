@@ -1,0 +1,10 @@
+# Métriques des régions WorldGuard.
+#
+# Deux natures dans un module : le compte de régions se relève, le PvP refusé se compte.
+name: VaniaMetrics-WorldGuard
+version: ${version}
+main: fr.samflix.vaniametrics.module.worldguard.WorldGuardPaper
+api-version: '1.21'
+authors: [mc-vania]
+description: "Métriques WorldGuard : régions déclarées, PvP refusé."
+depend: [VaniaMetrics, WorldGuard]
