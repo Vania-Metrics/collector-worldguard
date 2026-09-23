@@ -14,72 +14,72 @@ import fr.samflix.vaniametrics.api.Gauge;
 import fr.samflix.vaniametrics.api.MetricRegistry;
 
 /**
- * WorldGuard — les régions protégées, et ce qu'elles refusent.
+ * WorldGuard — protected regions, and what they deny.
  *
- * <p>DEUX NATURES DANS UN MÊME MODULE, et c'est assumé : le NOMBRE de régions est un état, qu'on
- * relève ; le PvP refusé est un événement, qu'on compte. Les séparer ferait deux jars pour un même
- * plugin, ce que l'organisation « un jar par plugin » interdit.
+ * <p>Two kinds in one module, deliberately: region COUNT is state, polled; denied PvP is an
+ * event, counted. Splitting them would mean two jars for one plugin, which the "one jar per
+ * plugin" layout forbids.
  *
- * <p>Le compte de régions se relève en fond : {@code RegionManager.size()} est bon marché, mais il
- * faut parcourir les mondes, et une région créée il y a dix secondes n'intéresse personne à la
- * seconde près.
+ * <p>Region count is polled in the background: {@code RegionManager.size()} is cheap, but it
+ * requires walking every world, and a region created ten seconds ago doesn't matter to the
+ * second.
  */
 public final class WorldGuardCollector implements Collector, Listener {
 
 	private Gauge regions;
-	private Counter pvpRefuse;
+	private Counter pvpDenied;
 
 	@Override
-	public String nom() {
+	public String name() {
 		return "region";
 	}
 
 	@Override
-	public String origine() {
+	public String source() {
 		return "WorldGuard";
 	}
 
 	@Override
-	public boolean enFond() {
+	public boolean isBackground() {
 		return true;
 	}
 
 	@Override
-	public long intervalleSecondes() {
+	public long intervalSeconds() {
 		return 60;
 	}
 
 	@Override
-	public void declarer(MetricRegistry r) {
-		regions = r.gauge("region_count", "Régions protégées déclarées, par monde.", "world");
-		pvpRefuse = r.counter("region_pvp_denied_total",
-				"Attaques entre joueurs refusées par une région. C'est un compteur de FRICTION : "
-						+ "s'il monte, des joueurs se battent là où ils ne peuvent pas.");
+	public void declare(MetricRegistry r) {
+		regions = r.gauge("region_count", "Declared protected regions, per world.", "world");
+		pvpDenied = r.counter("region_pvp_denied_total",
+				"Player-vs-player attacks denied by a region. A FRICTION counter: "
+						+ "if it climbs, players are fighting where they can't.");
 	}
 
 	/**
-	 * Le compte de régions, monde par monde.
+	 * Region count, world by world.
 	 *
-	 * <p>{@code getLoaded()} ET PAS {@code get(World)}, et ce n'est pas une préférence : la
-	 * seconde exige un {@code com.sk89q.worldedit.world.World}, donc WorldEdit au classpath de
-	 * compilation — or WorldEdit 7.4.5 est compilé en CLASSE 69, c'est-à-dire Java 25, qu'un
-	 * javac visant Java 21 refuse de lire. {@code getLoaded()} rend directement les gestionnaires
-	 * chargés, et {@code RegionManager.getName()} donne le nom du monde : aucune dépendance de
-	 * plus, et le résultat est le même.
+	 * <p>{@code getLoaded()} and NOT {@code get(World)} — not a stylistic choice: the latter
+	 * requires a {@code com.sk89q.worldedit.world.World}, hence WorldEdit on the compile
+	 * classpath — but WorldEdit 7.4.5 is compiled at CLASS 69, i.e. Java 25, which a javac
+	 * targeting Java 21 refuses to read. {@code getLoaded()} returns the loaded managers
+	 * directly, and {@code RegionManager.getName()} gives the world name: no extra dependency,
+	 * same result.
 	 */
 	@Override
-	public void relever(MetricRegistry r) {
-		// Les mondes vont et viennent : sans remise à zéro, un monde déchargé garderait son
-		// compte publié pour toujours.
+	public void collect(MetricRegistry r) {
+		// Worlds come and go: without clearing, an unloaded world would keep its last
+		// published count forever.
 		regions.clear();
-		for (RegionManager gestionnaire :
+		for (RegionManager manager :
 				WorldGuard.getInstance().getPlatform().getRegionContainer().getLoaded()) {
-			regions.set(gestionnaire.size(), gestionnaire.getName());
+			regions.set(manager.size(), manager.getName());
 		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPvpRefuse(DisallowedPVPEvent e) {
-		pvpRefuse.inc();
+	public void onPvpDenied(DisallowedPVPEvent e) {
+		pvpDenied.inc();
 	}
 }

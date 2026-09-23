@@ -7,26 +7,26 @@ import fr.samflix.vaniametrics.api.VaniaMetrics;
 import fr.samflix.vaniametrics.api.VaniaMetricsProvider;
 
 /**
- * Métriques des régions WorldGuard.
+ * WorldGuard region metrics.
  *
- * <p>Deux natures dans un module : le compte de régions se relève, le PvP refusé se compte.
+ * <p>Two kinds in one module: region count is polled, denied PvP is counted.
  */
 public final class WorldGuardPaper extends JavaPlugin {
 
-	private WorldGuardCollector collecteur;
+	private WorldGuardCollector collector;
 
 	@Override
 	public void onEnable() {
-		VaniaMetrics metriques = VaniaMetricsProvider.get();
-		collecteur = new WorldGuardCollector();
-		metriques.enregistrer(collecteur);
-		Bukkit.getPluginManager().registerEvents(collecteur, this);
+		VaniaMetrics metrics = VaniaMetricsProvider.get();
+		collector = new WorldGuardCollector();
+		metrics.register(collector);
+		Bukkit.getPluginManager().registerEvents(collector, this);
 	}
 
 	@Override
 	public void onDisable() {
-		if (collecteur != null) {
-			VaniaMetricsProvider.chercher().ifPresent(m -> m.retirer(collecteur));
+		if (collector != null) {
+			VaniaMetricsProvider.find().ifPresent(m -> m.unregister(collector));
 		}
 	}
 }
