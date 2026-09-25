@@ -1,3 +1,5 @@
+<img src="icon.png" alt="" width="96" align="right">
+
 # collector-worldguard
 
 VaniaMetrics collector for WorldGuard. One module = one jar, loaded by the platform if — and only if — the core is present.
