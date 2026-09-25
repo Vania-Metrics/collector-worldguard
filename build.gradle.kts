@@ -7,12 +7,10 @@ plugins {
     java
 }
 
-// THE VERSION IS THE API'S, the one this jar compiles against: read from the
-// included core's Version.java, never copied.
+// The version is this collector's own, kept by release-please in version.txt; the core it
+// compiles against is vaniaCore.ref, in gradle.properties.
 val vaniaCoreDir = gradle.extra["vaniaCoreDir"] as File
-val versionSource = vaniaCoreDir.resolve("api/src/main/java/fr/samflix/vaniametrics/api/Version.java")
-version = Regex("""VALUE = "([^"]+)"""").find(versionSource.readText())?.groupValues?.get(1)
-    ?: error("version unreadable in $versionSource")
+version = file("version.txt").readText().trim()
 
 dependencies {
     // Linked via the composite build to the core repo's api/ project.
